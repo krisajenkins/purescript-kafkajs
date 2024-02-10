@@ -38,9 +38,10 @@ import Data.Traversable (traverse)
 import Effect (Effect)
 import Effect.Aff (Aff)
 import Effect.Exception (error)
+import Foreign.Object (Object)
 import Kafka.Kafka (Kafka)
 import Node.Buffer (Buffer)
-import Prelude (Unit, bind, (#), ($), (>>>))
+import Prelude (Unit, bind, map, (#), ($), (>>>))
 
 foreign import data Consumer :: Type
 
@@ -91,6 +92,7 @@ type InternalConsumerMessage
   = { key :: Nullable Buffer
     , value :: Buffer
     , offset :: String
+    , headers :: Object (Nullable Buffer)
     }
 
 type InternalConsumerBatch
@@ -105,6 +107,7 @@ type ConsumerMessage
   = { key :: Maybe Buffer
     , value :: Buffer
     , offset :: Offset
+    , headers :: Object (Maybe Buffer)
     }
 
 type ConsumerBatch
@@ -241,12 +244,13 @@ type EachBatch
     (Aff Unit)
 
 toConsumerMessage :: InternalConsumerMessage -> Either String ConsumerMessage
-toConsumerMessage { key, value, offset } = do
+toConsumerMessage { key, value, offset, headers } = do
   o <- note "offset is not a number" $ fromString offset
   pure
     { key: toMaybe key
     , value: value
     , offset: Offset o
+    , headers: map toMaybe headers
     }
 
 toConsumerBatch :: InternalConsumerBatch -> Either String ConsumerBatch
