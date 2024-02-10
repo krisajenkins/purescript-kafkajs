@@ -1,6 +1,8 @@
 module Kafka.Consumer
   ( Consumer
   , GroupId(..)
+  , EachBatchAutoResolve(..)
+  , AutoCommit(..)
   , ConsumerConfig
   , SubscriptionConfig
   , makeConsumer
@@ -21,24 +23,24 @@ module Kafka.Consumer
   , disconnect
   ) where
 
-import Prelude (Unit, bind, (#), ($), (>>>))
+import Kafka.Types
+import Control.Applicative (pure)
+import Control.Monad.Error.Class (throwError)
 import Control.Promise (Promise, toAffE, fromAff)
-import Kafka.Kafka (Kafka)
-import Data.Function.Uncurried (Fn2, Fn3, Fn7, mkFn7, runFn2, runFn3)
+import Data.Either (Either, either, note)
+import Data.Function.Uncurried (Fn2, Fn4, Fn7, mkFn7, runFn2, runFn4)
+import Data.Int (fromString)
+import Data.Maybe (Maybe, maybe)
+import Data.Newtype (class Newtype, un, unwrap)
+import Data.Nullable (Nullable, toMaybe)
+import Data.Show (class Show)
+import Data.Traversable (traverse)
 import Effect (Effect)
 import Effect.Aff (Aff)
-import Data.Show (class Show)
-import Kafka.Types
-import Data.Nullable (Nullable, toMaybe)
-import Node.Buffer (Buffer)
-import Data.Maybe (Maybe, maybe)
-import Data.Traversable (traverse)
-import Control.Monad.Error.Class (throwError)
 import Effect.Exception (error)
-import Data.Int (fromString)
-import Control.Applicative (pure)
-import Data.Either (Either, either, note)
-import Data.Newtype (un, class Newtype)
+import Kafka.Kafka (Kafka)
+import Node.Buffer (Buffer)
+import Prelude (Unit, bind, (#), ($), (>>>))
 
 foreign import data Consumer :: Type
 
@@ -49,6 +51,16 @@ instance ntGroupId :: Newtype GroupId String
 
 derive newtype instance showGroupId :: Show GroupId
 
+newtype EachBatchAutoResolve
+  = EachBatchAutoResolve Boolean
+
+instance ntEachBatchAutoResolve :: Newtype EachBatchAutoResolve Boolean
+
+newtype AutoCommit
+  = AutoCommit Boolean
+
+instance ntAutoCommit :: Newtype AutoCommit Boolean
+
 type ConsumerConfig
   = { groupId :: GroupId
     , readUncommitted :: Boolean
@@ -56,7 +68,9 @@ type ConsumerConfig
     }
 
 type SubscriptionConfig
-  = { topic :: String }
+  = { topics :: Array String
+    , fromBeginning :: Boolean
+    }
 
 foreign import makeConsumerImpl :: Fn2 Kafka ConsumerConfig Consumer
 
@@ -248,10 +262,10 @@ toConsumerBatch { fetchedOffset, highWatermark, messages, partition, topic } = d
     , topic: Topic topic
     }
 
-foreign import eachBatchImpl :: Fn3 Consumer Boolean EachBatchImpl (Effect (Promise Unit))
+foreign import eachBatchImpl :: Fn4 Consumer Boolean Boolean EachBatchImpl (Effect (Promise Unit))
 
-eachBatch :: Consumer -> Boolean -> EachBatch -> Aff Unit
-eachBatch consumer eachBatchAutoResolve handler =
+eachBatch :: Consumer -> EachBatchAutoResolve -> AutoCommit -> EachBatch -> Aff Unit
+eachBatch consumer eachBatchAutoResolve autoCommit handler =
   let
     iResolveOffset :: (Int -> Effect Unit) -> (Offset -> Effect Unit)
     iResolveOffset f = un Offset >>> f
@@ -285,7 +299,11 @@ eachBatch consumer eachBatchAutoResolve handler =
     internalHandler :: EachBatchImpl
     internalHandler = mkFn7 internalHandlerCurried
   in
-    runFn3 eachBatchImpl consumer eachBatchAutoResolve internalHandler # toAffE
+    runFn4 eachBatchImpl consumer
+      (unwrap eachBatchAutoResolve)
+      (unwrap autoCommit)
+      internalHandler
+      # toAffE
 
 foreign import disconnectImpl :: Consumer -> Effect (Promise Unit)
 

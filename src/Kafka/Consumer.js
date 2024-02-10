@@ -6,28 +6,28 @@ export const connectImpl = (consumer) => () => consumer.connect()
 
 export const subscribeImpl = (consumer, subscriptionConfig) => () => consumer.subscribe(subscriptionConfig)
 
-export const eachBatchImpl = (consumer, eachBatchAutoResolve, handler) => () => {
+export const eachBatchImpl = (consumer, eachBatchAutoResolve, autoCommit, handler) => () => {
     return consumer.run({
-        eachBatchAutoResolve: eachBatchAutoResolve,
-        eachBatch: ({ 
-            batch, 
-            resolveOffset, 
+        autoCommit,
+        eachBatchAutoResolve,
+        eachBatch: ({
+            batch,
+            resolveOffset,
             heartbeat,
-            commitOffsetsIfNecessary, 
+            commitOffsetsIfNecessary,
             uncommittedOffsets,
-            isRunning, 
+            isRunning,
             isStale }) => {
-            const resolveOffsetEff = offset => () => resolveOffset(offset)
-            const commitOffsetsIfNecessaryEff = () => commitOffsetsIfNecessary()
-            const uncommittedOffsetsEff = () => uncommittedOffsets()
-            const isRunningEff = () =>  isRunning()
-            const isStaleEff = () => isStale()
-            
-            return handler(batch, resolveOffsetEff, heartbeat, commitOffsetsIfNecessaryEff, uncommittedOffsetsEff, isRunningEff, isStaleEff)()
+              const resolveOffsetEff = offset => () => resolveOffset(offset);
+              const commitOffsetsIfNecessaryEff = () => commitOffsetsIfNecessary();
+              const uncommittedOffsetsEff = () => uncommittedOffsets();
+              const isRunningEff = () =>  isRunning();
+              const isStaleEff = () => isStale();
+
+              return handler(batch, resolveOffsetEff, heartbeat, commitOffsetsIfNecessaryEff, uncommittedOffsetsEff, isRunningEff, isStaleEff)();
         }
-        
-    })
-}
 
-export const disconnectImpl = (consumer) => () => consumer.disconnect()
+    });
+};
 
+export const disconnectImpl = (consumer) => () => consumer.disconnect();
