@@ -44,7 +44,7 @@ foreign import data Consumer :: Type
 
 newtype GroupId
   = GroupId String
-  
+
 instance ntGroupId :: Newtype GroupId String
 
 derive newtype instance showGroupId :: Show GroupId

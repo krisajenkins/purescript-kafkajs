@@ -12,16 +12,23 @@ import Data.Nullable (Nullable, toNullable)
 
 foreign import data Kafka :: Type
 
-
-data LogLevel = LogNothing | LogDebug | LogInfo | LogWarn | LogError
+data LogLevel
+  = LogNothing
+  | LogDebug
+  | LogInfo
+  | LogWarn
+  | LogError
 
 foreign import data InternalLogLevel :: Type
 
 foreign import internalLogNothing :: InternalLogLevel
 
 foreign import internalLogDebug :: InternalLogLevel
-foreign import internalLogInfo:: InternalLogLevel
+
+foreign import internalLogInfo :: InternalLogLevel
+
 foreign import internalLogWarn :: InternalLogLevel
+
 foreign import internalLogError :: InternalLogLevel
 
 type SaslConfig
@@ -43,7 +50,7 @@ type KafkaConfig
     , brokers :: Array String
     , ssl :: Boolean
     , sasl :: Maybe SaslConfig
-    , logLevel :: Maybe LogLevel 
+    , logLevel :: Maybe LogLevel
     }
 
 foreign import makeClientImpl :: InternalKafkaConfig -> Kafka
@@ -51,11 +58,14 @@ foreign import makeClientImpl :: InternalKafkaConfig -> Kafka
 makeClient :: KafkaConfig -> Kafka
 makeClient = toInternal >>> makeClientImpl
   where
-
   toInternalLogLevel LogNothing = internalLogNothing
+
   toInternalLogLevel LogDebug = internalLogDebug
+
   toInternalLogLevel LogInfo = internalLogDebug
+
   toInternalLogLevel LogWarn = internalLogWarn
+
   toInternalLogLevel LogError = internalLogError
 
   toInternal config =
@@ -63,5 +73,5 @@ makeClient = toInternal >>> makeClientImpl
     , brokers: config.brokers
     , ssl: config.ssl
     , sasl: toNullable config.sasl
-    , logLevel : config.logLevel <#> toInternalLogLevel # toNullable
+    , logLevel: config.logLevel <#> toInternalLogLevel # toNullable
     }
