@@ -1,12 +1,12 @@
 
 
-exports.makeConsumerImpl = (kafka, consumerConfig) => kafka.consumer(consumerConfig)
+export const makeConsumerImpl = (kafka, consumerConfig) => kafka.consumer(consumerConfig)
 
-exports.connectImpl = (consumer) => () => consumer.connect()
+export const connectImpl = (consumer) => () => consumer.connect()
 
-exports.subscribeImpl = (consumer, subscriptionConfig) => () => consumer.subscribe(subscriptionConfig)
+export const subscribeImpl = (consumer, subscriptionConfig) => () => consumer.subscribe(subscriptionConfig)
 
-exports.eachBatchImpl = (consumer, eachBatchAutoResolve, handler) => () => {
+export const eachBatchImpl = (consumer, eachBatchAutoResolve, handler) => () => {
     return consumer.run({
         eachBatchAutoResolve: eachBatchAutoResolve,
         eachBatch: ({ 
@@ -29,5 +29,5 @@ exports.eachBatchImpl = (consumer, eachBatchAutoResolve, handler) => () => {
     })
 }
 
-exports.disconnectImpl = (consumer) => () => consumer.disconnect()
+export const disconnectImpl = (consumer) => () => consumer.disconnect()
 

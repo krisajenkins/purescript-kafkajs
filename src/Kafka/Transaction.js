@@ -1,11 +1,11 @@
 
 
-exports.transactionImpl = (producer) => () => producer.transaction()
+export const transactionImpl = (producer) => () => producer.transaction()
 
-exports.sendImpl = (transaction, data) => () => transaction.send(data)
+export const sendImpl = (transaction, data) => () => transaction.send(data)
 
-exports.sendOffsetsImpl = (transaction, sendOffsets) => () => transaction.sendOffsets(sendOffsets)
+export const sendOffsetsImpl = (transaction, sendOffsets) => () => transaction.sendOffsets(sendOffsets)
 
-exports.commitImpl = (transaction) => () => transaction.commit()
+export const commitImpl = (transaction) => () => transaction.commit()
 
-exports.abortImpl = (transaction) => () => transaction.abort()
+export const abortImpl = (transaction) => () => transaction.abort()

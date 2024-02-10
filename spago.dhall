@@ -1,14 +1,20 @@
 { name = "kafkajs"
 , dependencies =
-  [ "aff-promise"
+  [ "aff"
+  , "aff-promise"
   , "console"
-  , "debug"
   , "effect"
+  , "either"
+  , "exceptions"
+  , "foldable-traversable"
+  , "functions"
+  , "integers"
   , "maybe"
+  , "newtype"
   , "node-buffer"
   , "nullable"
-  , "psci-support"
-  , "spec"
+  , "prelude"
+  , "transformers"
   ]
 , packages = ./packages.dhall
 , sources = [ "src/**/*.purs", "test/**/*.purs" ]

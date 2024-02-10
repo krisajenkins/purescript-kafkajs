@@ -1,9 +1,9 @@
-const { Kafka, logLevel } = require('kafkajs')
+import { Kafka, logLevel } from 'kafkajs';
 
-exports.makeClientImpl = params => new Kafka(params)
+export const makeClientImpl = params => new Kafka(params)
 
-exports.internalLogNothing = logLevel.NOTHING
-exports.internalLogDebug = logLevel.DEBUG
-exports.internalLogInfo = logLevel.INFO
-exports.internalLogWarn = logLevel.WARN
-exports.internalLogError = logLevel.ERROR
+export const internalLogNothing = logLevel.NOTHING
+export const internalLogDebug = logLevel.DEBUG
+export const internalLogInfo = logLevel.INFO
+export const internalLogWarn = logLevel.WARN
+export const internalLogError = logLevel.ERROR
