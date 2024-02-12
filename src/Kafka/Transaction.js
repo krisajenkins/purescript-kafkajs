@@ -1,11 +1,10 @@
+export const transactionImpl = (producer) => () => producer.transaction();
 
+export const sendImpl = (transaction, data) => () => transaction.send(data);
 
-export const transactionImpl = (producer) => () => producer.transaction()
+export const sendOffsetsImpl = (transaction, sendOffsets) => () =>
+  transaction.sendOffsets(sendOffsets);
 
-export const sendImpl = (transaction, data) => () => transaction.send(data)
+export const commitImpl = (transaction) => () => transaction.commit();
 
-export const sendOffsetsImpl = (transaction, sendOffsets) => () => transaction.sendOffsets(sendOffsets)
-
-export const commitImpl = (transaction) => () => transaction.commit()
-
-export const abortImpl = (transaction) => () => transaction.abort()
+export const abortImpl = (transaction) => () => transaction.abort();
