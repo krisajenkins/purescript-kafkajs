@@ -14,16 +14,21 @@ module Kafka.Producer
   , disconnect
   ) where
 
-import Prelude (Unit, (#), (>>>), (<#>))
 import Control.Promise (Promise, toAffE)
 import Data.Function.Uncurried (Fn2, runFn2)
+import Data.Map (Map)
+import Data.Map as Map
 import Data.Maybe (Maybe)
+import Data.Newtype (un)
 import Data.Nullable (Nullable, toNullable)
+import Data.Tuple (Tuple)
 import Effect (Effect)
 import Effect.Aff (Aff)
+import Foreign.Object (Object)
+import Foreign.Object as Object
 import Kafka.Kafka (Kafka)
 import Kafka.Types (Partition(..), Topic(..))
-import Data.Newtype (un)
+import Prelude (Unit, (#), (>>>), (<#>))
 
 foreign import data Producer :: Type
 
@@ -59,6 +64,7 @@ type ProducerMessage
   = { key :: Maybe String
     , value :: String
     , partition :: Maybe Partition
+    , headers :: Map String String
     }
 
 type ProducerBatch
@@ -72,6 +78,7 @@ type InternalProducerMessage
   = { key :: Nullable String
     , value :: String
     , partition :: Nullable Int
+    , headers :: Object String
     }
 
 type InternalProducerBatch
@@ -80,7 +87,9 @@ type InternalProducerBatch
     }
 
 toInternalProducerMessage :: ProducerMessage -> InternalProducerMessage
-toInternalProducerMessage { key, value, partition: partition } = { key: toNullable key, value: value, partition: partition <#> un Partition # toNullable }
+toInternalProducerMessage { key, value, partition, headers } = { key: toNullable key, value: value, partition: partition <#> un Partition # toNullable, headers: mapToObject headers }
+  where
+  mapToObject xs = Object.fromFoldable (Map.toUnfoldable xs :: Array (Tuple String String))
 
 toInternalProducerBatch :: ProducerBatch -> InternalProducerBatch
 toInternalProducerBatch { topic: Topic topic, messages } = { topic, messages: messages <#> toInternalProducerMessage }
