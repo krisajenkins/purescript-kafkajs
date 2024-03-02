@@ -68,10 +68,21 @@ type ConsumerConfig
     , autoCommit :: Boolean
     }
 
-type SubscriptionConfig
+type InternalSubscriptionConfig
   = { topics :: Array String
     , fromBeginning :: Boolean
     }
+
+type SubscriptionConfig
+  = { topics :: Array Topic
+    , fromBeginning :: Boolean
+    }
+
+fromSubscriptionConfig :: SubscriptionConfig -> InternalSubscriptionConfig
+fromSubscriptionConfig { topics, fromBeginning } =
+  { topics: map unwrap topics
+  , fromBeginning
+  }
 
 foreign import makeConsumerImpl :: Fn2 Kafka ConsumerConfig Consumer
 
@@ -83,10 +94,10 @@ foreign import connectImpl :: Consumer -> Effect (Promise Unit)
 connect :: Consumer -> Aff Unit
 connect = connectImpl >>> toAffE
 
-foreign import subscribeImpl :: Fn2 Consumer SubscriptionConfig (Effect (Promise Unit))
+foreign import subscribeImpl :: Fn2 Consumer InternalSubscriptionConfig (Effect (Promise Unit))
 
 subscribe :: Consumer -> SubscriptionConfig -> Aff Unit
-subscribe consumer subscriptionConfig = runFn2 subscribeImpl consumer subscriptionConfig # toAffE
+subscribe consumer subscriptionConfig = runFn2 subscribeImpl consumer (fromSubscriptionConfig subscriptionConfig) # toAffE
 
 type InternalConsumerMessage
   = { key :: Nullable Buffer
