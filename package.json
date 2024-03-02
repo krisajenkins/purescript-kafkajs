@@ -4,7 +4,7 @@
   "description": "Purescript wrapper for kafkajs",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "spago test"
   },
   "repository": {
     "type": "git",
@@ -17,9 +17,9 @@
   },
   "homepage": "https://github.com/HivemindTechnologies/purescript-kafkajs#readme",
   "devDependencies": {
-    "purescript": "^0.14.0",
+    "purescript": "^0.15.15",
     "purty": "^6.3.0",
-    "spago": "^0.19.0"
+    "spago": "^0.93.25"
   },
   "dependencies": {
     "kafkajs": "^1.15.0"

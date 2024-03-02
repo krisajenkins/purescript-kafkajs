@@ -1,0 +1,25 @@
+package:
+  dependencies:
+  - aff
+  - aff-promise
+  - console
+  - effect
+  - either
+  - exceptions
+  - foldable-traversable
+  - foreign-object
+  - functions
+  - integers
+  - maybe
+  - newtype
+  - node-buffer
+  - nullable
+  - ordered-collections
+  - prelude
+  - transformers
+  - tuples
+  name: kafkajs
+workspace:
+  extra_packages: {}
+  package_set:
+    registry: 50.3.0
